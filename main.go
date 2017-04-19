@@ -35,8 +35,13 @@ import (
 	"strings"
 )
 
-var arr []string
-var logger *log.Logger
+
+var (
+	Version string
+	Build string
+
+	arr []string
+)
 
 type FastCGIServer struct{}
 
@@ -148,7 +153,7 @@ func main() {
 
 	h := new(FastCGIServer)
 
-	log.Print("mtmediasrv: started")
+	log.Print("mtmediasrv: version ", Version, " (", Build, ") started")
 
 	err = fcgi.Serve(listener, h)
 }
