@@ -1,0 +1,31 @@
+#
+# mtmediasrv.yaml - example config file
+#
+
+# Specifies the path to the HTTP content that will be served
+# webroot: /var/www/media
+
+# Socket location/name. Folder must be writable by mtmediasrv
+# socket: /run/mtmediasrv/sock
+
+# Enable media scanning and copying?
+# mediascan: true
+
+# Extensions of files that will be copied/linked if found in the scan:
+# extensions: [ .png, .jpg, .jpeg, .ogg, .x, .b3d, .obj ]
+
+# Enable hard linking of media into webroot
+# medialink: true
+
+# Enable copying of media into webroot (not used if medialink is enabled)
+# mediacopy: false
+
+# List of paths where media should be copied from, recursively
+# mediapath:
+# (default: empty)
+#
+# Example of multiple paths:
+# mediapath:
+# - /home/minetest/git/minetest
+# - /home/minetest/git/minetest_game
+

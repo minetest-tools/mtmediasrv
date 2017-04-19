@@ -3,6 +3,13 @@
 
 A Minetest Media server implementation as fcgi server.
 
+This program is useful to distribute minetest media (textures, models,
+sounds) to minetest clients for multiplayer server owners that wish to
+have their media hosted on a `remote media server` URL. Doing this as
+a separate download removes some of the download bandwidth from the
+actual game server and offloads it to a different HTTP server. This
+will work for clients that have cURL support enabled.
+
 
 ### Requirements
 
@@ -10,12 +17,18 @@ A Minetest Media server implementation as fcgi server.
 - webserver must be able to access file sockets in /run/mtmediasrv
 - systemd for controlling the service startup
 - go to build the service
+- mod assets to serve
 
 This program is intended to run as fcgi process and handle POST
 requests for the `/index.mth` URI. It listens on a local unix domain
 socket, and needs to read the media files in the media folder to
 create sha1 hashes. It creates a hash list of files it has available
 and keeps this in memory.
+
+At startup, the program can optionally scan mods and subgames to find
+and copy or hardlink (the default) all the assets into the webroot.
+The hardlink method is better for space, but may fail if the media
+is not on the same filesystem as the webroot.
 
 When a client connects, the client POSTS their list of known sha1
 hashes of files they need.
@@ -30,6 +43,8 @@ need to have your web server serve that content as static files.
 
 ### Building
 
+mtmediasrv uses `viper` to read configuration files. You must
+`go get https://github.com/spf13/viper` before building.
 Run `go build` in this folder to create the binary `mtschemsrv`.
 
 Please note the currently hardcoded values in the binary and
@@ -48,6 +63,10 @@ automatically. If the content changes, you need to restart the program.
 
 You should not have a file called `index.mth` in the media folder,
 although this will not break anything, it will probably be confusing.
+
+Copy and edit the `mtmediasrv.yaml` file and point it at the proper
+webroot, socket path, and mediapath entries. Place it in /etc/ or
+~/.config/.
 
 
 ### logging

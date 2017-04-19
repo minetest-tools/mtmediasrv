@@ -32,13 +32,17 @@ import (
 	"net/http"
 	"net/http/fcgi"
 	"os"
+	"path/filepath"
 	"strings"
+	"github.com/spf13/viper"
 )
 
 
 var (
 	Version string
 	Build string
+
+	newmedia int
 
 	arr []string
 )
@@ -134,13 +138,108 @@ func parseMedia(path string) {
 	}
 }
 
+func collectMedia(l bool, c bool, e map[string]bool, w string) filepath.WalkFunc {
+	return func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Print(err)
+			return nil
+		}
+		if info.IsDir() {
+			return nil
+		}
+		ext := filepath.Ext(path)
+		if e[ext] {
+			sha, err := getHash(path)
+			if err != nil {
+				return err
+			}
+
+			of := strings.Join([]string{w, sha}, "/")
+
+			if l {
+				err := os.Link(path, of)
+				if err != nil {
+					return err
+				}
+				newmedia++
+			} else if c {
+				in, err := os.Open(path)
+				if err != nil {
+					return err
+				}
+				defer in.Close()
+				os.Remove(of)
+				out, err := os.Create(of)
+				if err != nil {
+					return err
+				}
+				defer out.Close()
+				_, err = io.Copy(out, in)
+				closeErr := out.Close()
+				if err != nil {
+					return err
+				}
+				newmedia++
+				return closeErr
+			}
+		}
+		return nil
+	}
+}
 
 func main() {
-	p := "/var/www/media"
-	parseMedia(p)
+	// config stuff
+	viper.SetConfigName("mtmediasrv")
+	viper.SetConfigType("yaml")
+
+	viper.AddConfigPath("/usr/share/defaults/etc")
+	viper.AddConfigPath("/etc")
+	viper.AddConfigPath("$HOME/.config")
+
+	viper.SetDefault("socket", "/run/mtmediasrv/sock")
+	viper.SetDefault("webroot", "/var/www/media")
+	viper.SetDefault("mediapath", []string{})
+	viper.SetDefault("mediascan", "true")
+	viper.SetDefault("medialink", "true")
+	viper.SetDefault("mediacopy", "false")
+	viper.SetDefault("extensions", []string{ ".png", ".jpg", ".jpeg", ".ogg", ".x", ".b3d", ".obj"})
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal("Error in confog file: ", err)
+	}
+
+	// step 1, collect media files
+	w := viper.GetString("webroot")
+	ext := viper.GetStringSlice("extensions")
+	extmap := make(map[string]bool)
+	for i := 0; i < len(ext); i++ {
+		extmap[ext[i]] = true
+	}
+	if viper.GetBool("mediascan") {
+		l := viper.GetBool("medialink")
+		c := viper.GetBool("mediacopy")
+		if (!(l || c)) {
+			log.Fatal("mediascan enabled but both medialink and mediacopy are disabled!")
+		}
+		if len(viper.GetStringSlice("mediapath")) == 0 {
+			log.Fatal("empty mediapath list, but mediascan was enabled!")
+		}
+		for _, v := range viper.GetStringSlice("mediapath") {
+			log.Print("Scaning mediapath: ", v)
+			err := filepath.Walk(v, collectMedia(l, c, extmap, w))
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		log.Print("mediascan linked/copied files: ", newmedia)
+	}
+
+	// step 2, fill our hash table `arr`
+	parseMedia(w)
 	log.Print("mtmediasrv: Number of media files: ", len(arr))
 
-	s := "/run/mtmediasrv/sock"
+	s := viper.GetString("socket")
 	os.Remove(s)
 
 	listener, err := net.Listen("unix", s)
