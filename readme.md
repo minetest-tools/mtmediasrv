@@ -43,12 +43,12 @@ need to have your web server serve that content as static files.
 
 ### Building
 
+Note that binaries are available in the releases section of the
+github project.
+
 mtmediasrv uses `viper` to read configuration files. You must
 `go get https://github.com/spf13/viper` before building.
-Run `go build` in this folder to create the binary `mtschemsrv`.
-
-Please note the currently hardcoded values in the binary and
-example configuration files.
+Run `make` in this folder to create the binary `mtschemsrv`.
 
 
 ### Installation
