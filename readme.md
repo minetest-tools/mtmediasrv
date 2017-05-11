@@ -16,8 +16,15 @@ will work for clients that have cURL support enabled.
 - nginx or apache, with fcgi
 - webserver must be able to access file sockets in /run/mtmediasrv
 - systemd for controlling the service startup
-- go to build the service
 - mod assets to serve
+
+Optionally, if you want to compile the source yourself:
+
+- go to build the service
+
+Binary builds are available for Linux under `releases` on the github
+project. Other OS builds can be added on request, but the code is
+intended to run headless on a Linux server.
 
 This program is intended to run as fcgi process and handle POST
 requests for the `/index.mth` URI. It listens on a local unix domain
