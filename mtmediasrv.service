@@ -5,8 +5,8 @@ Description=Minetest Media server
 User=www
 Type=simple
 Restart=always
-ExecStartPre=/usr/bin/mkdir -p /run/mtmediasrv
-ExecStartPre=/usr/bin/chown www /run/mtmediasrv
+ExecStartPre=+/usr/bin/mkdir -p /run/mtmediasrv
+ExecStartPre=+/usr/bin/chown www /run/mtmediasrv
 WorkingDirectory=/var/empty
 ExecStart=/usr/local/bin/mtmediasrv
 
