@@ -63,6 +63,14 @@ Run `make` in this folder to create the binary `mtschemsrv`.
 Several example config and service units are provided as an example
 on how to deploy this service.
 
+It is recommended to use the mtmediasrv.service and cp that file to
+/etc/systemd/system, and then enable it with `systemctl daemon-reload;
+systemctl enable mtmediasrv`.
+
+Copy the `mtmediasrv.yaml` file to `/etc/`, and configure the paths
+to point to the right locations. Your webroot should be empty, as
+it will be filled by the daemon automatically.
+
 Once you have configured your web server properly so that it serves
 up the static content files by hash, point the mtmediasrv to the
 same folder and it will talk to minetest clients that request media
@@ -74,6 +82,9 @@ although this will not break anything, it will probably be confusing.
 Copy and edit the `mtmediasrv.yaml` file and point it at the proper
 webroot, socket path, and mediapath entries. Place it in /etc/ or
 ~/.config/.
+
+Once everything is in place, do `systemctl start mtmediasrv` and check
+the output of `journalctl -u mtmediasrv` for errors and log output.
 
 
 ### logging
