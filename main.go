@@ -246,7 +246,7 @@ func main() {
 	if err != nil {
 		log.Fatal("mtmediasrv: net.Listen: ", err)
 	}
-	os.Chmod(s, 666)
+	os.Chmod(s, 0666)
 
 	defer listener.Close()
 
