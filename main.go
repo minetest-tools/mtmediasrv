@@ -253,4 +253,7 @@ func main() {
 	log.Print("mtmediasrv: version ", Version, " (", Build, ") started")
 
 	err = fcgi.Serve(listener, h)
+	if err != nil {
+		log.Fatal("mtmediasrv: fcgi.Serve: ", err)
+	}
 }
