@@ -1,4 +1,3 @@
-
 //
 //    mtmediasrv - a Minetest Media server implementation done right
 //
@@ -25,6 +24,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
+	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
 	"log"
@@ -34,13 +34,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/spf13/viper"
 )
-
 
 var (
 	Version string
-	Build string
+	Build   string
 
 	newmedia int
 
@@ -61,7 +59,7 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		log.Print("Request: invalid header\n")
 		return
 	}
-	if !bytes.Equal(version, []byte {0, 1}) {
+	if !bytes.Equal(version, []byte{0, 1}) {
 		log.Print("Request: unsupported version\n")
 		return
 	}
@@ -91,7 +89,7 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// formulate response
 	headers := w.Header()
 	headers.Add("Content-Type", "octet/stream")
-	headers.Add("Content-Length", fmt.Sprintf("%d", 6 + (len(resultarr) * 20)))
+	headers.Add("Content-Length", fmt.Sprintf("%d", 6+(len(resultarr)*20)))
 
 	c1, _ := w.Write([]byte(header))
 	c2, _ := w.Write([]byte(version))
@@ -128,7 +126,7 @@ func parseMedia(path string) {
 	arr = make([]string, 0)
 	files, _ := ioutil.ReadDir(path)
 	for _, f := range files {
-		h, err := getHash(strings.Join([]string{path, "/" , f.Name()}, ""))
+		h, err := getHash(strings.Join([]string{path, "/", f.Name()}, ""))
 		if err != nil {
 			log.Print("parseMedia(): ", f.Name(), err)
 			continue
@@ -202,7 +200,7 @@ func main() {
 	viper.SetDefault("mediascan", "true")
 	viper.SetDefault("medialink", "true")
 	viper.SetDefault("mediacopy", "false")
-	viper.SetDefault("extensions", []string{ ".png", ".jpg", ".jpeg", ".ogg", ".x", ".b3d", ".obj"})
+	viper.SetDefault("extensions", []string{".png", ".jpg", ".jpeg", ".ogg", ".x", ".b3d", ".obj"})
 
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -219,7 +217,7 @@ func main() {
 	if viper.GetBool("mediascan") {
 		l := viper.GetBool("medialink")
 		c := viper.GetBool("mediacopy")
-		if (!(l || c)) {
+		if !(l || c) {
 			log.Fatal("mediascan enabled but both medialink and mediacopy are disabled!")
 		}
 		if len(viper.GetStringSlice("mediapath")) == 0 {
