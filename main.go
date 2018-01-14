@@ -64,11 +64,11 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	req.Body.Read(version)
 
 	if !bytes.Equal(header, []byte("MTHS")) {
-		log.Print("Request: invalid header\n")
+		log.Print(req.RemoteAddr, ": invalid MTHS header")
 		return
 	}
 	if !bytes.Equal(version, []byte{0, 1}) {
-		log.Print("Request: unsupported version\n")
+		log.Print(req.RemoteAddr, ": unsupported MTHS version\n")
 		return
 	}
 
