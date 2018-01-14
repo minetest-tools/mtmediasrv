@@ -63,12 +63,21 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	req.Body.Read(header)
 	req.Body.Read(version)
 
+	// omit port numbers from peers
+	ip, _, err := net.SplitHostPort(req.RemoteAddr)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		log.Print("Request: unable to identify peer\n")
+		return
+	}
+	remoteip := net.ParseIP(ip).String()
+
 	if !bytes.Equal(header, []byte("MTHS")) {
-		log.Print(req.RemoteAddr, ": invalid MTHS header")
+		log.Print(remoteip, ": invalid MTHS header")
 		return
 	}
 	if !bytes.Equal(version, []byte{0, 1}) {
-		log.Print(req.RemoteAddr, ": unsupported MTHS version\n")
+		log.Print(remoteip, ": unsupported MTHS version\n")
 		return
 	}
 
@@ -109,7 +118,7 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// log transaction
-	log.Print(req.RemoteAddr, " '", req.UserAgent(), "' ", len(resultarr), "/", len(clientarr), " ", c)
+	log.Print(remoteip, " '", req.UserAgent(), "' ", len(resultarr), "/", len(clientarr), " ", c)
 }
 
 func getHash(path string) (string, error) {
