@@ -45,6 +45,14 @@ var (
 	arr []string
 )
 
+// Change our logging to be journalctl friendly
+type logWriter struct {
+}
+
+func (writer logWriter) Write(bytes []byte) (int, error) {
+	return fmt.Print(string(bytes))
+}
+
 type FastCGIServer struct{}
 
 func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -101,7 +109,7 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// log transaction
-	log.Print("mtmediasrv: ", req.RemoteAddr, " '", req.UserAgent(), "' ", len(resultarr), "/", len(clientarr), " ", c)
+	log.Print(req.RemoteAddr, " '", req.UserAgent(), "' ", len(resultarr), "/", len(clientarr), " ", c)
 }
 
 func getHash(path string) (string, error) {
@@ -186,6 +194,10 @@ func collectMedia(l bool, c bool, e map[string]bool, w string) filepath.WalkFunc
 }
 
 func main() {
+	// log output format
+	log.SetFlags(0)
+	log.SetOutput(new(logWriter))
+
 	// config stuff
 	viper.SetConfigName("mtmediasrv")
 	viper.SetConfigType("yaml")
@@ -235,14 +247,14 @@ func main() {
 
 	// step 2, fill our hash table `arr`
 	parseMedia(w)
-	log.Print("mtmediasrv: Number of media files: ", len(arr))
+	log.Print("Number of media files: ", len(arr))
 
 	s := viper.GetString("socket")
 	os.Remove(s)
 
 	listener, err := net.Listen("unix", s)
 	if err != nil {
-		log.Fatal("mtmediasrv: net.Listen: ", err)
+		log.Fatal("net.Listen: ", err)
 	}
 	os.Chmod(s, 0666)
 
@@ -250,10 +262,10 @@ func main() {
 
 	h := new(FastCGIServer)
 
-	log.Print("mtmediasrv: version ", Version, " (", Build, ") started")
+	log.Print("version ", Version, " (", Build, ") started")
 
 	err = fcgi.Serve(listener, h)
 	if err != nil {
-		log.Fatal("mtmediasrv: fcgi.Serve: ", err)
+		log.Fatal("fcgi.Serve: ", err)
 	}
 }
