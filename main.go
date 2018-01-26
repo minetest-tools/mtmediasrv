@@ -73,7 +73,7 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	if req.Method != "POST" {
 		w.Header().Set("Access-Control-Allow-Headers", "POST")
-		http.Error(w, err.Error(), http.StatusMethodNotAllowed)
+		http.Error(w, err.Error(), 405)
 		log.Printf("Invalid GET from %v\n", remoteip)
 		return
 	}
