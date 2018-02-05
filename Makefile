@@ -1,7 +1,14 @@
 
 PREFIX ?= /usr/local
 
-DIST := COPYING Makefile mtmediasrv.service mtmediasrv.yaml nginx-server.conf readme.md
+DIST := \
+	COPYING \
+	Makefile \
+	mtmediasrv.service \
+	mtmediasrv.yaml \
+	nginx-server.conf \
+	readme.md \
+	mtmediasrv.conf
 
 PROJECT := mtmediasrv
 VERSION = 3
@@ -13,9 +20,19 @@ $(PROJECT): main.go
 build: $(PROJECT)
 
 install: $(PROJECT)
-	go install
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	install -m0755 $(PROJECT) $(DESTDIR)$(PREFIX)/bin/$(PROJECT)
+	mkdir -p $(DESTDIR)$(PREFIX)/lib/tmpfiles.d
+	install -m0644 mtmediasrv.conf $(DESTDIR)$(PREFIX)/lib/tmpfiles.d/
+	mkdir -p $(DESTDIR)$(PREFIX)/lib/systemd/system
+	install -m0644 mtmediasrv.service $(DESTDIR)$(PREFIX)/lib/systemd/system
+	mkdir -p $(DESTDIR)$(PREFIX)/share/mtmediasrv
+	install -m0644 mtmediasrv.yaml $(DESTDIR)$(PREFIX)/share/mtmediasrv/mtmediasrv.yaml.example
+	@echo 'Installation complete. You may have to run:'
+	@echo '`sudo systemd-tmpfiles --create`'
+	@echo '`sudo systemctl daemon-reload`'
+	@echo '`sudo systemctl enable mtmediasrv`'
+	@echo '`sudo systemctl start mtmediasrv`'
 
 clean:
 	go clean
