@@ -4,7 +4,7 @@ PREFIX ?= /usr/local
 DIST := COPYING Makefile mtmediasrv.service mtmediasrv.yaml nginx-server.conf readme.md
 
 PROJECT := mtmediasrv
-VERSION = 2
+VERSION = 3
 BUILD = `git describe --tags --always`
 
 $(PROJECT): main.go

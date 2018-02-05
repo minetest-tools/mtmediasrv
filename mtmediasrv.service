@@ -2,11 +2,9 @@
 Description=Minetest Media server
 
 [Service]
-User=www
+User=httpd
 Type=simple
 Restart=always
-ExecStartPre=+/usr/bin/mkdir -p /run/mtmediasrv
-ExecStartPre=+/usr/bin/chown www /run/mtmediasrv
 WorkingDirectory=/var/empty
 ExecStart=/usr/local/bin/mtmediasrv
 
