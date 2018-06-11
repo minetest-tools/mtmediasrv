@@ -99,11 +99,11 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Iterate over client hashes and remove hashes that we don't have from it
-	resultarr := make([]string, 0)
+	resultmap := map[string]bool{}
 	for _, v := range clientarr {
 		for _, w := range arr {
 			if v == w {
-				resultarr = append(resultarr, v)
+				resultmap[v] = true
 				break
 			}
 		}
@@ -112,19 +112,19 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// formulate response
 	headers := w.Header()
 	headers.Add("Content-Type", "octet/stream")
-	headers.Add("Content-Length", fmt.Sprintf("%d", 6+(len(resultarr)*20)))
+	headers.Add("Content-Length", fmt.Sprintf("%d", 6+(len(resultmap)*20)))
 
 	c1, _ := w.Write([]byte(header))
 	c2, _ := w.Write([]byte(version))
 	c := c1 + c2
-	for _, v := range resultarr {
-		b, _ := hex.DecodeString(v)
+	for k := range resultmap {
+		b, _ := hex.DecodeString(k)
 		c3, _ := w.Write([]byte(b))
 		c = c + c3
 	}
 
 	// log transaction
-	log.Print(remoteip, " '", req.UserAgent(), "' ", len(resultarr), "/", len(clientarr), " ", c)
+	log.Print(remoteip, " '", req.UserAgent(), "' ", len(resultmap), "/", len(clientarr), " ", c)
 }
 
 func getHash(path string) (string, error) {
