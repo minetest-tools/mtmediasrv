@@ -11,7 +11,7 @@ DIST := \
 	mtmediasrv.conf
 
 PROJECT := mtmediasrv
-VERSION = 3
+VERSION = 4
 BUILD = `git describe --tags --always`
 
 $(PROJECT): main.go
