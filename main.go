@@ -180,13 +180,12 @@ func collectMedia(l bool, c bool, e map[string]bool, w string) filepath.WalkFunc
 			if l {
 				err := os.Link(path, of)
 				if err != nil {
-					if err != os.ErrExist {
-						return err
+					if os.IsExist(err) {
+						return nil
 					}
+					return err
 				}
-				if err != os.ErrExist {
-					newmedia++
-				}
+				newmedia++
 			} else if c {
 				in, err := os.Open(path)
 				if err != nil {
