@@ -61,6 +61,10 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	req.Body.Read(header)
 	req.Body.Read(version)
+	r := req.Referer()
+	if r == "" {
+		r = "-"
+	}
 
 	// omit port numbers from peers
 	ip, _, err := net.SplitHostPort(req.RemoteAddr)
@@ -121,7 +125,7 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// log transaction
-	log.Print(remoteip, " '", req.UserAgent(), "' ", len(resultmap), "/", len(clientarr), " ", c)
+	log.Print(remoteip, " '", req.UserAgent(), "' ", len(resultmap), "/", len(clientarr), " ", c, " ", r)
 }
 
 func getHash(path string) (string, error) {
