@@ -42,7 +42,7 @@ var (
 
 	newmedia int
 
-	arr []string
+	arr map[string]bool
 )
 
 // Change our logging to be journalctl friendly
@@ -101,11 +101,8 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// Iterate over client hashes and remove hashes that we don't have from it
 	resultmap := map[string]bool{}
 	for _, v := range clientarr {
-		for _, w := range arr {
-			if v == w {
-				resultmap[v] = true
-				break
-			}
+		if arr[v] {
+			resultmap[v] = true
 		}
 	}
 
@@ -146,7 +143,6 @@ func getHash(path string) (string, error) {
 }
 
 func parseMedia(path string) {
-	arr = make([]string, 0)
 	files, _ := ioutil.ReadDir(path)
 	for _, f := range files {
 		h, err := getHash(strings.Join([]string{path, "/", f.Name()}, ""))
@@ -155,7 +151,7 @@ func parseMedia(path string) {
 			continue
 		}
 
-		arr = append(arr, h)
+		arr[h] = true
 	}
 }
 
@@ -264,6 +260,7 @@ func main() {
 	}
 
 	// step 2, fill our hash table `arr`
+	arr = make(map[string]bool)
 	parseMedia(w)
 	log.Print("Number of media files: ", len(arr))
 
