@@ -62,10 +62,6 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	req.Body.Read(header)
 	req.Body.Read(version)
 	r := req.Referer()
-	if r == "" {
-		r = "-"
-	}
-
 	// omit port numbers from peers
 	ip, _, err := net.SplitHostPort(req.RemoteAddr)
 	if err != nil {
@@ -74,6 +70,13 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	remoteip := net.ParseIP(ip).String()
+
+	if r == "" {
+		// reject all clients without a referrer URL set
+		http.Error(w, "A referer URL is required", 403)
+		log.Print(remoteip, " '", req.UserAgent(), "' REJECT 0 ", r)
+		return
+	}
 
 	if req.Method != "POST" {
 		w.Header().Set("Access-Control-Allow-Headers", "POST")
