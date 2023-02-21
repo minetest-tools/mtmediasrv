@@ -74,7 +74,7 @@ func (s FastCGIServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if r == "" {
 		// reject all clients without a referrer URL set
 		http.Error(w, "A referer URL is required", 403)
-		log.Print(remoteip, " '", req.UserAgent(), "' REJECT 0 ", r)
+		log.Print(remoteip, " '", req.UserAgent(), "' REJECT 0 -", r)
 		return
 	}
 
