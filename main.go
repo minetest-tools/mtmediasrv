@@ -233,7 +233,16 @@ func main() {
 	viper.SetDefault("mediascan", "true")
 	viper.SetDefault("medialink", "true")
 	viper.SetDefault("mediacopy", "false")
-	viper.SetDefault("extensions", []string{".png", ".jpg", ".jpeg", ".ogg", ".x", ".b3d", ".obj"})
+	viper.SetDefault("extensions", []string{
+		// Image formats
+		".png", ".jpg", ".jpeg", 
+		// Sound
+		".ogg",
+		// Models
+		".x", ".b3d", ".obj",
+		// Translations
+		".tr",
+	})
 
 	err := viper.ReadInConfig()
 	if err != nil {
